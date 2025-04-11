@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Create Account</h1>
+            <p>Join Smart Care Assistant today</p>
+        </div>
+        
+        <form method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+                <i class="fas fa-envelope"></i>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Create a password">
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">I am a</label>
+                <select id="role" name="role" required>
+                    <option value="" disabled selected>Select your role</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="client">Client/Patient</option>
+                </select>
+                <i class="fas fa-user-tag"></i>
+            </div>
+            
+            <button type="submit" class="btn-auth">Sign Up</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+        </div>
+    </div>
+    
+    <div class="auth-illustration">
+        <img src="https://img.freepik.com/free-vector/medical-team-concept-illustration_114360-7433.jpg" alt="Healthcare team illustration">
+    </div>
+</div>
+{% endblock %}
