@@ -163,8 +163,8 @@ def dashboard():
     if user_role == 'doctor':
         patients = Patient.query.filter_by(doctor_id=user_id).all()
     else:
-        # For patients, get their health data
-        patient = Patient.query.filter_by(doctor_id=1, id=user_id).first()  # Simplified - adjust as needed
+        # For patients, get their own record
+        patient = Patient.query.filter_by(id=user_id).first()
         if patient:
             patient_data = patient.health_profile
             patient_stats = HealthStats.query.filter_by(patient_id=patient.id).order_by(HealthStats.recorded_at.desc()).first()
@@ -181,41 +181,51 @@ def dashboard():
 @app.route('/update_health_profile', methods=['POST'])
 def update_health_profile():
     if 'user_id' not in session or session['user_role'] != 'patient':
+        flash('Please login as patient to update health profile', 'danger')
         return redirect(url_for('login'))
     
-    patient = Patient.query.filter_by(doctor_id=1, id=session['user_id']).first()
-    if not patient:
-        flash('Patient record not found', 'danger')
+    try:
+        # Get the current patient (using user_id as patient_id)
+        patient = Patient.query.filter_by(id=session['user_id']).first()
+        
+        if not patient:
+            flash('Patient record not found', 'danger')
+            return redirect(url_for('dashboard'))
+        
+        # Update basic patient info
+        patient.age = int(request.form.get('age', 0))
+        patient.gender = 'Other'  # You should add gender field to form
+        
+        # Update or create health profile
+        health_profile = patient.health_profile
+        if not health_profile:
+            health_profile = HealthProfile(patient_id=patient.id)
+            db.session.add(health_profile)
+        
+        # Update health profile fields
+        health_profile.height = float(request.form.get('height', 0))
+        health_profile.weight = float(request.form.get('weight', 0))
+        health_profile.blood_type = request.form.get('blood_type', '')
+        health_profile.allergies = request.form.get('allergies', '')
+        health_profile.medical_history = request.form.get('medical_history', '')
+        
+        # Create a new health stats record
+        new_stats = HealthStats(
+            patient_id=patient.id,
+            heart_rate=72,  # Default or could add form fields
+            temperature=98.6,
+            blood_pressure="120/80"
+        )
+        db.session.add(new_stats)
+        
+        db.session.commit()
+        flash('Health profile updated successfully', 'success')
         return redirect(url_for('dashboard'))
     
-    # Update basic patient info
-    patient.age = request.form.get('age', 0)
-    patient.gender = 'Other'  # Could add gender field to form
-    
-    # Update or create health profile
-    health_profile = patient.health_profile
-    if not health_profile:
-        health_profile = HealthProfile(patient_id=patient.id)
-        db.session.add(health_profile)
-    
-    health_profile.height = float(request.form.get('height', 0))
-    health_profile.weight = float(request.form.get('weight', 0))
-    health_profile.blood_type = request.form.get('blood_type', '')
-    health_profile.allergies = request.form.get('allergies', '')
-    health_profile.medical_history = request.form.get('medical_history', '')
-    
-    # Create a new health stats record
-    new_stats = HealthStats(
-        patient_id=patient.id,
-        heart_rate=72,  # Default or could add form fields
-        temperature=98.6,
-        blood_pressure="120/80"
-    )
-    db.session.add(new_stats)
-    
-    db.session.commit()
-    flash('Health profile updated successfully', 'success')
-    return redirect(url_for('dashboard'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating profile: {str(e)}', 'danger')
+        return redirect(url_for('dashboard'))
 
 @app.route('/add_patient', methods=['POST'])
 def add_patient():

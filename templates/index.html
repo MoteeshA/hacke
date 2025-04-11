@@ -3,8 +3,7 @@
 
 {% block content %}
 
-
-<nav class="nabar">
+<nav class="navbar">
     <div class="navbar-brand">
         <i class="fas fa-heartbeat"></i>
         <span>Smart Care</span>
@@ -31,35 +30,70 @@
         <div class="user-profile">
             <img src="https://ui-avatars.com/api/?name={{ user_name }}&background=random" alt="User">
             <span>{{ user_name }}</span>
+            <i class="fas fa-chevron-down"></i>
         </div>
-        <a href="{{ url_for('logout') }}" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
+        <div class="user-dropdown">
+            <a href="#profile"><i class="fas fa-user"></i> Profile</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
     </div>
 </nav>
 
 <main class="main-content">
     <div class="dashboard-header">
-        <h1>Welcome, {{ user_name }}</h1>
-        <p>{% if user_role == 'doctor' %}Doctor{% else %}Patient{% endif %} Dashboard</p>
+        <div class="header-text">
+            <h1>Welcome, {{ user_name }}</h1>
+            {% if user_role == 'doctor' %}
+                <p>Doctor Dashboard - Overview of your patients and activities</p>
+            {% else %}
+                <p>Patient Dashboard - Manage your health profile</p>
+            {% endif %}
+        </div>
+        <div class="header-actions">
+            <div class="date-display">
+                <i class="fas fa-calendar-alt"></i>
+                <span id="current-date"></span>
+            </div>
+        </div>
     </div>
     
     {% if user_role == 'doctor' %}
-    <div class="dashboard-section">
-        <h2>Add New Patient</h2>
+    <div class="dashboard-section glass-card">
+        <div class="section-header">
+            <h2>Add New Patient</h2>
+            <div class="section-actions">
+                <button class="btn-icon">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
         <form class="patient-form" method="POST" action="{{ url_for('add_patient') }}">
             <div class="form-row">
-                <input type="text" name="name" placeholder="Patient Name" required>
-                <input type="number" name="age" placeholder="Age" required>
-                <select name="gender" required>
-                    <option value="" disabled selected>Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" name="name" placeholder="Enter full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" name="age" placeholder="Age" required>
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select name="gender" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
             </div>
             <div class="form-row">
-                <input type="text" name="condition" placeholder="Medical Condition" required>
+                <div class="form-group form-group-wide">
+                    <label>Medical Condition</label>
+                    <input type="text" name="condition" placeholder="Diagnosis or symptoms" required>
+                </div>
                 <button type="submit" class="btn-primary">
                     <i class="fas fa-plus"></i> Add Patient
                 </button>
@@ -67,49 +101,75 @@
         </form>
     </div>
     
-    <div class="dashboard-section">
-        <h2>Your Patients</h2>
+    <div class="dashboard-section glass-card">
+        <div class="section-header">
+            <h2>Your Patients</h2>
+            <div class="section-actions">
+                <button class="btn-icon">
+                    <i class="fas fa-filter"></i>
+                </button>
+                <button class="btn-icon">
+                    <i class="fas fa-sort"></i>
+                </button>
+            </div>
+        </div>
         <div class="patients-grid">
             {% for patient in patients %}
-            <div class="patient-card">
+            <div class="patient-card glass-card">
                 <div class="patient-avatar">
                     <img src="https://ui-avatars.com/api/?name={{ patient.name }}&background=random" alt="{{ patient.name }}">
+                    <span class="status-indicator"></span>
                 </div>
                 <div class="patient-info">
                     <h3>{{ patient.name }}</h3>
-                    <p><i class="fas fa-birthday-cake"></i> {{ patient.age }} years</p>
-                    <p><i class="fas fa-venus-mars"></i> {{ patient.gender }}</p>
-                    <p><i class="fas fa-disease"></i> {{ patient.condition }}</p>
+                    <div class="patient-meta">
+                        <span><i class="fas fa-birthday-cake"></i> {{ patient.age }} years</span>
+                        <span><i class="fas fa-venus-mars"></i> {{ patient.gender }}</span>
+                    </div>
+                    <div class="patient-condition">
+                        <i class="fas fa-disease"></i> {{ patient.condition }}
+                    </div>
                 </div>
                 <div class="patient-actions">
-                    <button class="btn-icon"><i class="fas fa-notes-medical"></i></button>
-                    <button class="btn-icon"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon btn-transparent"><i class="fas fa-notes-medical"></i></button>
+                    <button class="btn-icon btn-transparent"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon btn-transparent"><i class="fas fa-ellipsis-v"></i></button>
                 </div>
             </div>
             {% else %}
-            <div class="empty-state">
+            <div class="empty-state glass-card">
                 <i class="fas fa-user-md"></i>
                 <p>No patients added yet</p>
+                <button class="btn-outline">Add Your First Patient</button>
             </div>
             {% endfor %}
         </div>
     </div>
+    
     {% else %}
-    <div class="dashboard-section">
-        <h2>Update Your Health Profile</h2>
+    
+    <div class="dashboard-section glass-card">
+        <div class="section-header">
+            <h2>Health Profile</h2>
+            <div class="section-actions">
+                <button class="btn-icon">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
         <form class="health-form" method="POST" action="{{ url_for('update_health_profile') }}">
             <div class="form-row">
                 <div class="form-group">
                     <label for="age">Age</label>
-                    <input type="number" id="age" name="age" placeholder="Enter your age" value="{{ patient_data.age if patient_data }}" required>
+                    <input type="number" id="age" name="age" placeholder="Enter your age" value="{{ patient_data.age if patient_data else '' }}" required>
                 </div>
                 <div class="form-group">
                     <label for="height">Height (cm)</label>
-                    <input type="number" id="height" name="height" placeholder="Enter your height" value="{{ patient_data.height if patient_data }}" required>
+                    <input type="number" id="height" name="height" placeholder="Enter your height" value="{{ patient_data.height if patient_data else '' }}" required>
                 </div>
                 <div class="form-group">
                     <label for="weight">Weight (kg)</label>
-                    <input type="number" id="weight" name="weight" step="0.1" placeholder="Enter your weight" value="{{ patient_data.weight if patient_data }}" required>
+                    <input type="number" id="weight" name="weight" step="0.1" placeholder="Enter your weight" value="{{ patient_data.weight if patient_data else '' }}" required>
                 </div>
             </div>
             
@@ -117,78 +177,100 @@
                 <div class="form-group">
                     <label for="blood_type">Blood Type</label>
                     <select id="blood_type" name="blood_type" required>
-                        <option value="" disabled selected>Select Blood Type</option>
-                        <option value="A+" {% if patient_data and patient_data.blood_type == 'A+' %}selected{% endif %}>A+</option>
-                        <option value="A-" {% if patient_data and patient_data.blood_type == 'A-' %}selected{% endif %}>A-</option>
-                        <option value="B+" {% if patient_data and patient_data.blood_type == 'B+' %}selected{% endif %}>B+</option>
-                        <option value="B-" {% if patient_data and patient_data.blood_type == 'B-' %}selected{% endif %}>B-</option>
-                        <option value="AB+" {% if patient_data and patient_data.blood_type == 'AB+' %}selected{% endif %}>AB+</option>
-                        <option value="AB-" {% if patient_data and patient_data.blood_type == 'AB-' %}selected{% endif %}>AB-</option>
-                        <option value="O+" {% if patient_data and patient_data.blood_type == 'O+' %}selected{% endif %}>O+</option>
-                        <option value="O-" {% if patient_data and patient_data.blood_type == 'O-' %}selected{% endif %}>O-</option>
+                        <option value="" disabled {% if not patient_data or not patient_data.blood_type %}selected{% endif %}>Select Blood Type</option>
+                        {% for type in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                        <option value="{{ type }}" {% if patient_data and patient_data.blood_type == type %}selected{% endif %}>{{ type }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="allergies">Allergies</label>
-                    <input type="text" id="allergies" name="allergies" placeholder="List any allergies" value="{{ patient_data.allergies if patient_data }}">
+                    <input type="text" id="allergies" name="allergies" placeholder="List any allergies" value="{{ patient_data.allergies if patient_data else '' }}">
                 </div>
             </div>
             
             <div class="form-row">
                 <div class="form-group full-width">
                     <label for="medical_history">Medical History</label>
-                    <textarea id="medical_history" name="medical_history" placeholder="Describe any past medical conditions or surgeries">{{ patient_data.medical_history if patient_data }}</textarea>
+                    <textarea id="medical_history" name="medical_history" placeholder="Describe any past medical conditions or surgeries">{{ patient_data.medical_history if patient_data else '' }}</textarea>
                 </div>
             </div>
             
-            <button type="submit" class="btn-primary">
-                <i class="fas fa-save"></i> Update Profile
-            </button>
+            <div class="form-actions">
+                <button type="reset" class="btn-outline">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
         </form>
     </div>
     
-    <div class="dashboard-section">
-        <h2>Your Health Summary</h2>
+    <div class="dashboard-section glass-card">
+        <div class="section-header">
+            <h2>Health Metrics</h2>
+            <div class="section-actions">
+                <button class="btn-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
         <div class="health-stats">
-            <div class="stat-card">
-                <i class="fas fa-heartbeat"></i>
+            <div class="stat-card glass-card">
+                <div class="stat-icon pulse">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
                 <h3>Heart Rate</h3>
-                <p>{{ patient_stats.heart_rate if patient_stats else '--' }} bpm</p>
-                <span class="stat-{{ 'good' if patient_stats and (60 <= patient_stats.heart_rate <= 100) else 'warning' }}">
+                <p class="stat-value">{{ patient_stats.heart_rate if patient_stats else '--' }} <span>bpm</span></p>
+                <span class="stat-status {{ 'good' if patient_stats and (60 <= patient_stats.heart_rate <= 100) else 'warning' }}">
                     {{ 'Normal' if patient_stats and (60 <= patient_stats.heart_rate <= 100) else 'Check' }}
                 </span>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-temperature-high"></i>
+            <div class="stat-card glass-card">
+                <div class="stat-icon">
+                    <i class="fas fa-temperature-high"></i>
+                </div>
                 <h3>Body Temp</h3>
-                <p>{{ patient_stats.temperature if patient_stats else '--' }}°F</p>
-                <span class="stat-{{ 'good' if patient_stats and (97 <= patient_stats.temperature <= 99) else 'warning' }}">
+                <p class="stat-value">{{ patient_stats.temperature if patient_stats else '--' }}<span>°F</span></p>
+                <span class="stat-status {{ 'good' if patient_stats and (97 <= patient_stats.temperature <= 99) else 'warning' }}">
                     {{ 'Normal' if patient_stats and (97 <= patient_stats.temperature <= 99) else 'Check' }}
                 </span>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-weight"></i>
+            <div class="stat-card glass-card">
+                <div class="stat-icon">
+                    <i class="fas fa-weight"></i>
+                </div>
                 <h3>BMI</h3>
-                <p>{{ patient_stats.bmi if patient_stats else '--' }}</p>
-                <span class="stat-{{ 'good' if patient_stats and (18.5 <= patient_stats.bmi <= 24.9) else 'warning' }}">
+                <p class="stat-value">{{ patient_stats.bmi if patient_stats else '--' }}</p>
+                <span class="stat-status {{ 'good' if patient_stats and (18.5 <= patient_stats.bmi <= 24.9) else 'warning' }}">
                     {{ 'Healthy' if patient_stats and (18.5 <= patient_stats.bmi <= 24.9) else 'Check' }}
                 </span>
             </div>
-            <div class="stat-card">
-                <i class="fas fa-pills"></i>
+            <div class="stat-card glass-card">
+                <div class="stat-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
                 <h3>Medications</h3>
-                <p>{{ patient_stats.medications if patient_stats else '0' }} Active</p>
-                <a href="#" class="stat-link">View</a>
+                <p class="stat-value">{{ patient_stats.medications if patient_stats else '0' }} <span>Active</span></p>
+                <a href="#" class="stat-link">View All</a>
             </div>
         </div>
     </div>
     
-    <div class="dashboard-section">
-        <h2>Upcoming Appointments</h2>
+    <div class="dashboard-section glass-card">
+        <div class="section-header">
+            <h2>Upcoming Appointments</h2>
+            <div class="section-actions">
+                <button class="btn-icon">
+                    <i class="fas fa-calendar-plus"></i>
+                </button>
+            </div>
+        </div>
         <div class="appointments-list">
             {% if appointments %}
                 {% for appointment in appointments %}
-                <div class="appointment-card">
+                <div class="appointment-card glass-card">
                     <div class="appointment-date">
                         <span class="day">{{ appointment.date.strftime('%d') }}</span>
                         <span class="month">{{ appointment.date.strftime('%b').upper() }}</span>
@@ -197,22 +279,35 @@
                         <h3>Dr. {{ appointment.doctor_name }}</h3>
                         <p><i class="fas fa-clock"></i> {{ appointment.time.strftime('%I:%M %p') }}</p>
                         <p><i class="fas fa-map-marker-alt"></i> {{ appointment.location }}</p>
-                        <p><i class="fas fa-stethoscope"></i> {{ appointment.reason }}</p>
+                        <p class="appointment-reason"><i class="fas fa-stethoscope"></i> {{ appointment.reason }}</p>
                     </div>
                     <div class="appointment-actions">
-                        <button class="btn-outline">Reschedule</button>
-                        <button class="btn-primary">Confirm</button>
+                        <button class="btn-icon btn-transparent"><i class="fas fa-ellipsis-v"></i></button>
+                        <button class="btn-primary btn-sm">View Details</button>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
+                <div class="empty-state glass-card">
                     <i class="fas fa-calendar-times"></i>
                     <p>No upcoming appointments</p>
+                    <button class="btn-primary">Schedule Appointment</button>
                 </div>
             {% endif %}
         </div>
     </div>
     {% endif %}
 </main>
+
+<script>
+    // Display current date
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', options);
+    
+    // User dropdown toggle
+    document.querySelector('.user-profile').addEventListener('click', function() {
+        document.querySelector('.user-dropdown').classList.toggle('show');
+    });
+</script>
+
 {% endblock %}
